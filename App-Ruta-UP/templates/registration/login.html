@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="auth-wrapper">
+  <div class="auth-card">
+    <div class="auth-header">
+      <div>
+        <div class="auth-title">Iniciar sesión</div>
+        <div class="auth-subtitle">Accede para usar el mapa de Pamplona</div>
+      </div>
+      <div class="auth-pill">Modo interactivo</div>
+    </div>
+
+    {% if form.errors %}
+      <div class="auth-errors">
+        Usuario o contraseña incorrectos. Intenta de nuevo.
+      </div>
+    {% endif %}
+
+    <form method="post" class="auth-form">
+      {% csrf_token %}
+
+      <div class="auth-field">
+        <label class="auth-label">Usuario</label>
+        {{ form.username }}
+      </div>
+
+      <div class="auth-field">
+        <label class="auth-label">Contraseña</label>
+        {{ form.password }}
+      </div>
+
+      <div class="auth-actions">
+        <button type="submit" class="auth-btn-primary">Entrar</button>
+      </div>
+    </form>
+
+    <p class="auth-meta">
+      ¿No tienes cuenta?
+      <a href="{% url 'usuarios:registro' %}">Crear nueva cuenta</a>
+    </p>
+  </div>
+</div>
+{% endblock %}

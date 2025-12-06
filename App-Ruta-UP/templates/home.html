@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="App Ruta UP - Sistema de navegación y comunidad estudiantil">
+    <title>App Ruta UP | Inicio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: hsl(240, 100%, 65%);
+            --primary-dark: hsl(240, 100%, 55%);
+            --secondary: hsl(280, 100%, 65%);
+            --accent: hsl(320, 100%, 65%);
+            --success: hsl(150, 80%, 50%);
+            --bg-dark: hsl(220, 20%, 10%);
+            --bg-card: hsl(220, 20%, 15%);
+            --text-primary: hsl(0, 0%, 95%);
+            --text-secondary: hsl(0, 0%, 70%);
+            --shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, var(--bg-dark) 0%, hsl(220, 20%, 8%) 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated background elements */
+        body::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background:
+                radial-gradient(circle at 20% 30%, hsla(240, 100%, 65%, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, hsla(280, 100%, 65%, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, hsla(320, 100%, 65%, 0.1) 0%, transparent 50%);
+            animation: drift 20s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes drift {
+
+            0%,
+            100% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+
+            33% {
+                transform: translate(100px, -100px) rotate(120deg);
+            }
+
+            66% {
+                transform: translate(-100px, 100px) rotate(240deg);
+            }
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 4rem;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo {
+            font-size: 3.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--secondary), var(--accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+            letter-spacing: -1px;
+        }
+
+        .subtitle {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border-radius: 24px;
+            padding: 3rem 2rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid hsla(0, 0%, 100%, 0.05);
+            cursor: pointer;
+            animation: fadeInUp 0.8s ease-out backwards;
+        }
+
+        .card:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .card:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .card:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--card-gradient-start), var(--card-gradient-end));
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .card.card-primary {
+            --card-gradient-start: hsla(240, 100%, 65%, 0.2);
+            --card-gradient-end: hsla(280, 100%, 65%, 0.2);
+        }
+
+        .card.card-secondary {
+            --card-gradient-start: hsla(280, 100%, 65%, 0.2);
+            --card-gradient-end: hsla(320, 100%, 65%, 0.2);
+        }
+
+        .card.card-tertiary {
+            --card-gradient-start: hsla(320, 100%, 65%, 0.2);
+            --card-gradient-end: hsla(240, 100%, 65%, 0.2);
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow);
+            border-color: hsla(0, 0%, 100%, 0.1);
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card:active {
+            transform: translateY(-4px);
+        }
+
+        .card-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .card-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, var(--icon-color-1), var(--icon-color-2));
+            box-shadow: 0 8px 24px var(--icon-shadow);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover .card-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .card-primary .card-icon {
+            --icon-color-1: var(--primary);
+            --icon-color-2: var(--secondary);
+            --icon-shadow: hsla(240, 100%, 65%, 0.4);
+        }
+
+        .card-secondary .card-icon {
+            --icon-color-1: var(--secondary);
+            --icon-color-2: var(--accent);
+            --icon-shadow: hsla(280, 100%, 65%, 0.4);
+        }
+
+        .card-tertiary .card-icon {
+            --icon-color-1: var(--accent);
+            --icon-color-2: var(--primary);
+            --icon-shadow: hsla(320, 100%, 65%, 0.4);
+        }
+
+        .card-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+        }
+
+        .card-description {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            background: hsla(0, 0%, 100%, 0.1);
+            color: var(--text-secondary);
+            backdrop-filter: blur(10px);
+        }
+
+        .badge.badge-active {
+            background: linear-gradient(135deg, hsla(150, 80%, 50%, 0.2), hsla(150, 80%, 40%, 0.2));
+            color: var(--success);
+            border: 1px solid hsla(150, 80%, 50%, 0.3);
+        }
+
+        .badge-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        /* Botones de autenticación */
+        .auth-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .auth-btn {
+            background: hsla(0, 0%, 100%, 0.05);
+            border: 1px solid hsla(0, 0%, 100%, 0.1);
+            border-radius: 12px;
+            padding: 1.25rem 1rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .auth-btn:hover {
+            background: hsla(0, 0%, 100%, 0.1);
+            border-color: hsla(0, 0%, 100%, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .auth-btn-icon {
+            font-size: 1.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .auth-btn-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .auth-btn-badge {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .footer {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            animation: fadeIn 1s ease-out 0.5s backwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 2.5rem;
+            }
+
+            .subtitle {
+                font-size: 1rem;
+            }
+
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .card {
+                padding: 2rem 1.5rem;
+            }
+
+            .auth-buttons {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header class="header">
+            <h1 class="logo">🎓 App Ruta UP</h1>
+            <p class="subtitle">Tu compañero universitario digital</p>
+        </header>
+
+        <main class="cards-grid">
+            <!-- Card 1: Mapa Interactivo -->
+            <a href="{% url 'apimapa:mapa' %}" style="text-decoration: none; color: inherit;">
+                <article class="card card-primary">
+                    <div class="card-content">
+                        <div class="card-icon">🗺️</div>
+                        <h2 class="card-title">Mapa Interactivo</h2>
+                        <p class="card-description">
+                            Navega por el campus universitario con nuestro mapa interactivo. Encuentra aulas, edificios
+                            y puntos de interés.
+                        </p>
+                        <span class="badge badge-active">
+                            <span class="badge-dot"></span>
+                            Disponible
+                        </span>
+                    </div>
+                </article>
+            </a>
+
+            <!-- Card 2: Foro Estudiantil -->
+            <article class="card card-secondary">
+                <div class="card-content">
+                    <div class="card-icon">💬</div>
+                    <h2 class="card-title">Foro Estudiantil</h2>
+                    <p class="card-description">
+                        Conecta con otros estudiantes, comparte ideas y participa en discusiones académicas.
+                    </p>
+                    <span class="badge">
+                        🚧 En Desarrollo
+                    </span>
+                </div>
+            </article>
+
+            <!-- Card 3: Autenticación (2 en 1) -->
+            <article class="card card-tertiary">
+                <div class="card-content">
+                    <div class="card-icon">👤</div>
+                    </footer>
+                </div>
+</body>
+
+</html>

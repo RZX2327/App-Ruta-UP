@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa Pamplona | Distancia y tiempo</title>
+    <style>
+        :root {
+            --color-bg: #0f172a;
+            --color-card: #020617;
+            --color-accent: #38bdf8;
+            --color-accent-soft: rgba(56, 189, 248, 0.15);
+            --color-text: #e5e7eb;
+            --color-muted: #9ca3af;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 16px;
+            background: radial-gradient(circle at top, #1e293b, #020617);
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            color: var(--color-text);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 960px;
+        }
+
+        .card {
+            background: linear-gradient(145deg, rgba(15, 23, 42, 0.95), rgba(2, 6, 23, 0.98));
+            border-radius: 18px;
+            box-shadow:
+                0 24px 60px rgba(15, 23, 42, 0.9),
+                0 0 0 1px rgba(148, 163, 184, 0.12);
+            padding: 20px 20px 16px;
+            backdrop-filter: blur(16px);
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+
+        .subtitle {
+            font-size: 0.85rem;
+            color: var(--color-muted);
+        }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: var(--color-accent-soft);
+            color: var(--color-accent);
+            font-size: 0.75rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .badge-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 999px;
+            background: var(--color-accent);
+            box-shadow: 0 0 12px rgba(56, 189, 248, 0.9);
+        }
+
+        .card-body {
+            display: grid;
+            grid-template-columns: minmax(0, 2fr) minmax(0, 1.1fr);
+            gap: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .card-body {
+                grid-template-columns: minmax(0, 1fr);
+            }
+        }
+
+        .map-wrapper {
+            border-radius: 14px;
+            overflow: hidden;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            background: #020617;
+        }
+
+        #map {
+            width: 100%;
+            height: min(60vh, 460px);
+        }
+
+        .side-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .button {
+            border: none;
+            border-radius: 999px;
+            padding: 10px 16px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            color: #0b1120;
+            background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+            box-shadow:
+                0 12px 25px rgba(56, 189, 248, 0.35),
+                0 0 0 1px rgba(15, 23, 42, 0.8);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
+        }
+
+        .button:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.05);
+            box-shadow:
+                0 16px 35px rgba(56, 189, 248, 0.5),
+                0 0 0 1px rgba(15, 23, 42, 0.9);
+        }
+
+        .button-icon {
+            width: 16px;
+            height: 16px;
+            border-radius: 999px;
+            border: 2px solid rgba(15, 23, 42, 0.9);
+            background: white;
+        }
+
+        .info-box {
+            border-radius: 14px;
+            padding: 10px 12px;
+            background: radial-gradient(circle at top left, rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.98));
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
+        .info-label {
+            font-size: 0.75rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--color-muted);
+            margin-bottom: 4px;
+        }
+
+        .info-main {
+            font-size: 0.92rem;
+        }
+
+        .hint {
+            font-size: 0.78rem;
+            color: var(--color-muted);
+        }
+
+        .pill-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 4px;
+        }
+
+        .pill {
+            padding: 3px 8px;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            color: var(--color-muted);
+        }
+
+        .select {
+            width: 100%;
+            margin-top: 4px;
+            padding: 8px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            background: rgba(15, 23, 42, 0.95);
+            color: var(--color-text);
+            font-size: 0.85rem;
+            outline: none;
+        }
+
+        .select:focus {
+            border-color: var(--color-accent);
+            box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.45);
+        }
+
+        .mode-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 4px;
+        }
+
+        .mode-pill {
+            border-radius: 999px;
+            border: 1px solid rgba(148, 163, 184, 0.4);
+            background: rgba(15, 23, 42, 0.9);
+            color: var(--color-muted);
+            padding: 5px 10px;
+            font-size: 0.78rem;
+            cursor: pointer;
+            transition: background 0.12s, color 0.12s, border-color 0.12s;
+        }
+
+        .mode-pill.active {
+            background: var(--color-accent);
+            color: #0b1120;
+            border-color: var(--color-accent);
+        }
+
+        /* Estilos para comentarios */
+        .comment-form {
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: var(--color-text);
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            background: rgba(15, 23, 42, 0.95);
+            color: var(--color-text);
+            font-size: 0.9rem;
+            font-family: inherit;
+            outline: none;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        input:focus,
+        textarea:focus {
+            border-color: var(--color-accent);
+            box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.45);
+        }
+
+        .comments-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .comment-card {
+            background: radial-gradient(circle at top left, rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.98));
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            border-radius: 12px;
+            padding: 14px;
+            transition: transform 0.12s ease;
+        }
+
+        .comment-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .comment-author {
+            font-weight: 600;
+            color: var(--color-text);
+            font-size: 0.9rem;
+        }
+
+        .comment-category {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            margin-left: 8px;
+            font-weight: 600;
+        }
+
+        .category-trafico {
+            background: rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+        }
+
+        .category-seguridad {
+            background: rgba(250, 204, 21, 0.2);
+            color: #fde047;
+        }
+
+        .category-ruta_alt {
+            background: rgba(34, 197, 94, 0.2);
+            color: #86efac;
+        }
+
+        .category-consejo {
+            background: rgba(56, 189, 248, 0.2);
+            color: #7dd3fc;
+        }
+
+        .category-otro {
+            background: rgba(168, 85, 247, 0.2);
+            color: #c4b5fd;
+        }
+
+        .comment-date {
+            text-align: right;
+            font-size: 0.75rem;
+            color: var(--color-muted);
+        }
+
+        .comment-content {
+            color: var(--color-text);
+            line-height: 1.5;
+            font-size: 0.9rem;
+        }
+
+        .message {
+            padding: 10px 12px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            font-size: 0.85rem;
+        }
+
+        .message.success {
+            background: rgba(34, 197, 94, 0.15);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: #86efac;
+        }
+
+        .message.error {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--color-muted);
+        }
+
+        .nav-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .nav-btn {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            color: var(--color-text);
+            padding: 8px 16px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover {
+            background: rgba(15, 23, 42, 0.9);
+            border-color: var(--color-accent);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="nav-header">
+            <a href="{% url 'home' %}" class="nav-btn">
+                <span>⬅️</span> Volver al Inicio
+            </a>
+            {% if user.is_authenticated %}
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <span class="badge">👤 {{ user.username }}</span>
+                <form action="{% url 'usuarios:logout' %}" method="post" style="margin: 0;">
+                    {% csrf_token %}
+                    <button type="submit" class="nav-btn" style="cursor: pointer;">Cerrar Sesión</button>
+                </form>
+            </div>
+            {% else %}
+            <a href="{% url 'usuarios:login' %}?next={% url 'apimapa:mapa' %}" class="nav-btn">
+                <span>🔐</span> Iniciar Sesión
+            </a>
+            {% endif %}
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div>
+                    <div class="title">Mapa de Pamplona (N. de Santander)</div>
+                    <div class="subtitle">
+                        Haz clic en un punto de la ciudad y ve distancia y tiempo estimado según el modo de viaje desde
+                        tu ubicación.
+                    </div>
+                </div>
+                <div class="badge">
+                    <span class="badge-dot"></span>
+                    Modo interactivo
+                </div>
+            </div>
+
+            <div class="card-body">
+                <div class="map-wrapper">
+                    <div id="map" data-lat="{{ latitud }}" data-lng="{{ longitud }}"></div>
+                </div>
+
+                <div class="side-panel">
+                    <button class="button" onclick="localizarUsuario()">
+                        <span class="button-icon"></span>
+                        Usar mi ubicación actual
+                    </button>
+
+                    <div class="info-box">
+                        <div class="info-label">Lugares guardados</div>
+                        <select id="saved-place" class="select" onchange="seleccionarGuardado(this.value)">
+                            <option value="">Selecciona un lugar...</option>
+                            <option value="centro">Parque Águeda Gallardo (Centro)</option>
+                            <option value="uni">Universidad de Pamplona (Campus principal)</option>
+                        </select>
+                        <div class="hint">
+                            También puedes hacer clic directamente en el mapa para elegir cualquier punto dentro de la
+                            ciudad.
+                        </div>
+                    </div>
+
+                    <div class="info-box">
+                        <div class="info-label">Modo de viaje</div>
+                        <div class="mode-pills">
+                            <button type="button" class="mode-pill active"
+                                onclick="cambiarModo(this, 'DRIVING')">Carro</button>
+                            <button type="button" class="mode-pill" onclick="cambiarModo(this, 'WALKING')">A
+                                pie</button>
+                            <button type="button" class="mode-pill"
+                                onclick="cambiarModo(this, 'BICYCLING')">Bicicleta</button>
+                            <button type="button" class="mode-pill" onclick="cambiarModo(this, 'TRANSIT')">Bus</button>
+                        </div>
+                        <div class="hint">
+                            El tiempo estimado se recalcula automáticamente cuando cambias el modo de viaje.
+                        </div>
+                    </div>
+
+                    <div class="info-box">
+                        <div class="info-label">Resultado</div>
+                        <div id="info" class="info-main">
+                            Elige un lugar guardado o haz clic en el mapa para seleccionar el destino.
+                        </div>
+                        <div class="pill-row">
+                            <span class="pill">Click en el mapa = destino</span>
+                            <span class="pill">Marcador azul = tú</span>
+                            <span class="pill">Marcador rojo = destino</span>
+                        </div>
+                    </div>
+
+                    <div class="info-box">
+                        <div class="info-label">Consejos</div>
+                        <div class="hint">
+                            Primero pulsa <strong>"Usar mi ubicación actual"</strong> y luego prueba diferentes puntos y
+                            modos de viaje (carro, a pie, bicicleta, bus) para comparar tiempos de llegada dentro de
+                            Pamplona.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección de Comentarios -->
+        <div class="card">
+            <div class="card-header">
+                <div>
+                    <div class="title">💬 Consejos de Tránsito</div>
+                    <div class="subtitle">
+                        Comparte consejos sobre el tráfico, seguridad y rutas en Pamplona
+                    </div>
+                </div>
+                <div class="badge">
+                    <span class="badge-dot"></span>
+                    {{ comentarios|length }} comentario{{ comentarios|length|pluralize }}
+                </div>
+            </div>
+
+            {% if messages %}
+            {% for message in messages %}
+            <div class="message {{ message.tags }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+            {% endif %}
+
+            <!-- Formulario de comentarios -->
+            <div class="comment-form">
+                <form method="post" action="{% url 'apimapa:crear_comentario' %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        {% if user.is_authenticated %}
+                        <label class="form-label">Tu nombre</label>
+                        <input type="text" value="{{ user.username }}" disabled
+                            style="background: rgba(255,255,255,0.05); cursor: not-allowed; border-color: rgba(34, 197, 94, 0.3);">
+                        <input type="hidden" name="nombre" value="{{ user.username }}">
+                        <div class="hint" style="margin-top: 4px; color: #86efac;">Sesión iniciada como {{ user.username
+                            }}</div>
+                        {% else %}
+                        <label class="form-label">Tu nombre (opcional)</label>
+                        <input type="text" name="nombre" placeholder="Anónimo" maxlength="100">
+                        <div class="hint" style="margin-top: 4px;">
+                            Si dejas vacío, aparecerás como "Anónimo".
+                            <a href="{% url 'usuarios:login' %}?next={% url 'apimapa:mapa' %}"
+                                style="color: var(--color-accent); text-decoration: none;">Inicia sesión</a> para usar
+                            tu
+                            usuario.
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Categoría</label>
+                        <select name="categoria" class="select">
+                            {% for value, label in categorias %}
+                            <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Tu comentario</label>
+                        <textarea name="contenido" placeholder="Comparte un consejo sobre el tránsito en Pamplona..."
+                            maxlength="500" required></textarea>
+                        <div class="hint" style="margin-top: 4px;">Máximo 500 caracteres</div>
+                    </div>
+
+                    <button type="submit" class="button" style="width: 100%;">
+                        Publicar Comentario
+                    </button>
+                </form>
+            </div>
+
+            <!-- Lista de comentarios -->
+            <div class="info-label" style="margin-top: 20px; margin-bottom: 12px;">COMENTARIOS RECIENTES</div>
+            <div class="comments-list">
+                {% if comentarios %}
+                {% for comentario in comentarios %}
+                <div class="comment-card">
+                    <div class="comment-header">
+                        <div>
+                            <span class="comment-author">👤 {{ comentario.get_nombre_usuario }}</span>
+                            <span class="comment-category category-{{ comentario.categoria }}">
+                                {{ comentario.get_categoria_display }}
+                            </span>
+                        </div>
+                        <div class="comment-date">
+                            {{ comentario.fecha_creacion|date:"d/m/Y H:i" }}
+                        </div>
+                    </div>
+                    <div class="comment-content">
+                        {{ comentario.contenido }}
+                    </div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <div class="empty-state">
+                    <div style="font-size: 2rem; margin-bottom: 12px;">📝</div>
+                    <p>Aún no hay comentarios. ¡Sé el primero en compartir un consejo!</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="hint"
+                style="text-align: center; padding: 16px; border-top: 1px solid rgba(148, 163, 184, 0.2); margin-top: 20px;">
+                <strong>Nota:</strong> Los comentarios son públicos y visibles para toda la comunidad universitaria.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let map;
+        let markerDestino;
+        let markerUsuario;
+        let userPos = null;
+        let distanceService;
+
+        const MODE_LABELS = {
+            DRIVING: "en carro",
+            WALKING: "a pie",
+            BICYCLING: "en bicicleta",
+            TRANSIT: "en bus"
+        };
+
+        const SAVED_PLACES = {
+            centro: {
+                name: "Parque Águeda Gallardo (Centro)",
+                lat: 7.37641,
+                lng: -72.64822
+            },
+            uni: {
+                name: "Universidad de Pamplona (Campus principal)",
+                lat: 7.38595,
+                lng: -72.65
+            }
+        };
+
+        let currentMode = "DRIVING";
+
+        const CITY_BOUNDS = {
+            north: 7.39,
+            south: 7.36,
+            east: -72.63,
+            west: -72.67,
+        };
+
+        function initMap() {
+            const mapDiv = document.getElementById("map");
+            const lat = parseFloat(mapDiv.dataset.lat);
+            const lng = parseFloat(mapDiv.dataset.lng);
+            const centro = { lat: lat, lng: lng };
+
+            map = new google.maps.Map(mapDiv, {
+                zoom: 14,
+                center: centro,
+                mapTypeId: google.maps.MapTypeId.ROADMAP,
+                restriction: {
+                    latLngBounds: CITY_BOUNDS,
+                    strictBounds: true
+                },
+                streetViewControl: false,
+                fullscreenControl: true
+            });
+
+            distanceService = new google.maps.DistanceMatrixService();
+
+            markerDestino = new google.maps.Marker({
+                position: centro,
+                map: map,
+                title: "Destino (haz clic en el mapa o elige un lugar guardado)"
+            });
+
+            map.addListener("click", function (e) {
+                const destinoLatLng = e.latLng;
+                markerDestino.setPosition(destinoLatLng);
+
+                if (userPos) {
+                    calcularDistanciaYTiempo(userPos, destinoLatLng);
+                } else {
+                    document.getElementById("info").innerText =
+                        'Destino seleccionado en el mapa. Pulsa "Usar mi ubicación actual" para calcular distancia y tiempo.';
+                }
+            });
+        }
+
+        function localizarUsuario() {
+            const info = document.getElementById("info");
+
+            if (!navigator.geolocation) {
+                info.innerText = "Tu navegador no soporta geolocalización.";
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(function (pos) {
+                userPos = new google.maps.LatLng(
+                    pos.coords.latitude,
+                    pos.coords.longitude
+                );
+
+                if (markerUsuario) {
+                    markerUsuario.setMap(null);
+                }
+
+                markerUsuario = new google.maps.Marker({
+                    position: userPos,
+                    map: map,
+                    title: "Tu ubicación",
+                    icon: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png"
+                });
+
+                map.setCenter(userPos);
+
+                if (markerDestino && markerDestino.getPosition()) {
+                    calcularDistanciaYTiempo(userPos, markerDestino.getPosition());
+                } else {
+                    info.innerText = "Ubicación obtenida. Haz clic en el mapa de Pamplona o elige un lugar guardado para definir el destino.";
+                }
+            }, function (error) {
+                info.innerText = "No se pudo obtener tu ubicación (" + error.message + ").";
+            });
+        }
+
+        function cambiarModo(button, mode) {
+            currentMode = mode;
+
+            document.querySelectorAll(".mode-pill").forEach(b => b.classList.remove("active"));
+            button.classList.add("active");
+
+            if (userPos && markerDestino && markerDestino.getPosition()) {
+                calcularDistanciaYTiempo(userPos, markerDestino.getPosition());
+            }
+        }
+
+        function seleccionarGuardado(key) {
+            if (!key) return;
+
+            const place = SAVED_PLACES[key];
+            const destinoLatLng = new google.maps.LatLng(place.lat, place.lng);
+            markerDestino.setPosition(destinoLatLng);
+            map.setCenter(destinoLatLng);
+
+            if (userPos) {
+                calcularDistanciaYTiempo(userPos, destinoLatLng);
+            } else {
+                document.getElementById("info").innerText =
+                    'Destino "' + place.name + '" seleccionado. Pulsa "Usar mi ubicación actual" para calcular distancia y tiempo.';
+            }
+        }
+
+        function calcularDistanciaYTiempo(origenLatLng, destinoLatLng) {
+            const info = document.getElementById("info");
+
+            const options = {
+                origins: [origenLatLng],
+                destinations: [destinoLatLng],
+                travelMode: currentMode,
+                unitSystem: google.maps.UnitSystem.METRIC,
+            };
+
+            if (currentMode === "TRANSIT") {
+                options.transitOptions = {
+                    modes: [google.maps.TransitMode.BUS]
+                };
+            }
+
+            distanceService.getDistanceMatrix(
+                options,
+                function (response, status) {
+                    if (status !== "OK") {
+                        info.innerText = "Error al calcular distancia/tiempo: " + status;
+                        return;
+                    }
+
+                    const elemento = response.rows[0].elements[0];
+                    if (elemento.status !== "OK") {
+                        info.innerText = "No se pudo calcular ruta para ese punto.";
+                        return;
+                    }
+
+                    const distancia = elemento.distance.text;
+                    const duracion = elemento.duration.text;
+
+                    info.innerText =
+                        "Distancia al punto seleccionado: " + distancia +
+                        " · Tiempo estimado " + MODE_LABELS[currentMode] + ": " + duracion + ".";
+                }
+            );
+        }
+    </script>
+
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&callback=initMap">
+    </script>
+</body>
+
+</html>
